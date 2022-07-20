@@ -1,21 +1,21 @@
 package tg
 
 import (
-	"net/http"
 	"encoding/json"
-	"log"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 const (
-	tgApi = "https://api.telegram.org/bot"
+	tgAPI = "https://api.telegram.org/bot"
 )
 
 func Run(token string) {
-	botUrl := tgApi + token
+	botURL := tgAPI + token
 	for {
-		updates, err := getUpdates(botUrl)
+		updates, err := getUpdates(botURL)
 		if err != nil {
 			log.Println("error in updates: ", err.Error())
 		}
@@ -23,8 +23,8 @@ func Run(token string) {
 	}
 }
 
-func getUpdates(botUrl string) ([]Update, error) {
-	resp, err := http.Get(botUrl + "/getUpdates")
+func getUpdates(botURL string) ([]Update, error) {
+	resp, err := http.Get(botURL + "/getUpdates")
 	if err != nil {
 		return nil, err
 	}

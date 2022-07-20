@@ -1,17 +1,17 @@
 package tg
 
 type Update struct {
-	UpdateId int `json:"update_id"`
-	Message Message `json:"message"`
+	UpdateID int     `json:"update_id"`
+	Message  Message `json:"message"`
 }
 
 type Message struct {
-	Chat Chat `json:"chat"`
+	Chat Chat   `json:"chat"`
 	Text string `json:"text"`
 }
 
 type Chat struct {
-	ChatId int `json:"id"`
+	ChatID int `json:"id"`
 }
 
 type RestResponse struct {
