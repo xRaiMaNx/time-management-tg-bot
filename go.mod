@@ -1,4 +1,4 @@
-module github.com/xraimanx/timemanagementtgbot
+module github.com/xraimanx/time-management-tg-bot
 
 go 1.18
 

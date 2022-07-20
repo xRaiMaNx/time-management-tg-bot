@@ -1,1 +1,1 @@
-# TimeManagementTgBot
+# time-management-tg-bot

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/xraimanx/timemanagementtgbot/tg"
+	"github.com/xraimanx/time-management-tg-bot/tg"
 )
 
 func main() {
