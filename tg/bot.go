@@ -7,25 +7,35 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
+
+	"github.com/gammazero/deque"
 )
 
 const (
-	tgAPI = "https://api.telegram.org/bot"
+	tgAPI       = "https://api.telegram.org/bot"
+	threadCount = 8
 )
 
 func Run(token string) {
 	botURL := tgAPI + token
 	offset := 0
+	var d deque.Deque[Update]
+	var dm sync.Mutex
+	updateCh := make(chan struct{}, 1024)
+	for i := 0; i < threadCount-2; i++ {
+		go updateProcessing(botURL, &d, &dm, updateCh)
+	}
 	for {
 		updates, err := getUpdates(botURL, offset)
 		if err != nil {
 			log.Println("error in updates: ", err.Error())
 		}
 		for _, update := range updates {
-			err = respond(botURL, update)
-			if err != nil {
-				log.Println("error in response: ", err.Error())
-			}
+			dm.Lock()
+			d.PushBack(update)
+			dm.Unlock()
+			updateCh <- struct{}{}
 			offset = update.UpdateID + 1
 		}
 	}
@@ -62,4 +72,20 @@ func respond(botURL string, update Update) error {
 		return err
 	}
 	return nil
+}
+
+func updateProcessing(botURL string,
+	d *deque.Deque[Update],
+	dm *sync.Mutex,
+	updateCh <-chan struct{}) {
+	for {
+		<-updateCh
+		dm.Lock()
+		update := d.PopFront()
+		dm.Unlock()
+		err := respond(botURL, update)
+		if err != nil {
+			log.Println("error in response: ", err.Error())
+		}
+	}
 }
