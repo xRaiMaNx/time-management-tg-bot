@@ -19,31 +19,30 @@ var dayNums = map[string]int{
 	"sunday":    6,
 }
 
-func getMinutesFromString(time string) (int, error) {
-	times := strings.Split(time, ":")
+func getMinutesFromString(strTime string) (int, error) {
+	times := strings.Split(strTime, ":")
 	if len(times) != 2 {
 		return 0, ErrBadTime
 	}
 
-	minutes, err := strconv.Atoi(times[0])
+	minutes, err := strconv.Atoi(times[1])
 	if err != nil {
 		return 0, ErrBadTime
 	}
 
-	hours, err := strconv.Atoi(times[1])
+	hours, err := strconv.Atoi(times[0])
 	if err != nil {
 		return 0, ErrBadTime
 	}
-
 	return hours*60 + minutes, nil
 }
 
-func GetSchedule(weekDays []string, time string) (res [7]int, e error) {
+func GetSchedule(weekDays []string, strTime string) (res [7]int, e error) {
 	if len(weekDays) == 0 {
 		e = ErrBadWeekDay
 		return
 	}
-	minutes, e := getMinutesFromString(time)
+	minutes, e := getMinutesFromString(strTime)
 	if e != nil {
 		return
 	}
