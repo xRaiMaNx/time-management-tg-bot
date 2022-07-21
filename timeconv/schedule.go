@@ -52,8 +52,14 @@ func GetSchedule(weekDays []string, strTime string) (res [7]int, e error) {
 	if e != nil {
 		return
 	}
-	for _, weedDay := range weekDays {
-		if dayNum, ok := dayNums[strings.ToLower(weedDay)]; ok {
+	for _, weekDay := range weekDays {
+		if weekDay == "all" {
+			for i := 0; i < 7; i++ {
+				res[i] = minutes
+			}
+			return
+		}
+		if dayNum, ok := dayNums[strings.ToLower(weekDay)]; ok {
 			res[dayNum] = minutes
 		} else {
 			e = ErrBadWeekDay

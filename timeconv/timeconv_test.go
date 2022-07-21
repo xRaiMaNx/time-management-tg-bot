@@ -30,6 +30,8 @@ func TestSchedule_Simple(t *testing.T) {
 		{"all_days", []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
 		{"without_leading_zero_hour", []string{"monday"}, "3:00", [7]int{3*60, 0, 0, 0, 0, 0, 0}},
 		{"not_lower_case", []string{"Monday"}, "00:01", [7]int{1, 0, 0, 0, 0, 0, 0}},
+		{"all", []string{"all"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
+		{"all_isnt_only_one", []string{"monday", "friday", "all"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
 	}{
 		t.Run(test.name, func(t *testing.T) {
 			res, err := GetSchedule(test.weekDays, test.strTime)
