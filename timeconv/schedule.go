@@ -25,13 +25,19 @@ func getMinutesFromString(strTime string) (int, error) {
 		return 0, ErrBadTime
 	}
 
+	if len(times[1]) != 2 {
+		return 0, ErrBadTime
+	}
 	minutes, err := strconv.Atoi(times[1])
-	if err != nil {
+	if err != nil || minutes < 0 || minutes > 60 {
 		return 0, ErrBadTime
 	}
 
+	if len(times[0]) > 2 {
+		return 0, ErrBadTime
+	}
 	hours, err := strconv.Atoi(times[0])
-	if err != nil {
+	if err != nil || hours < 0 || hours > 24 {
 		return 0, ErrBadTime
 	}
 	return hours*60 + minutes, nil
@@ -47,7 +53,7 @@ func GetSchedule(weekDays []string, strTime string) (res [7]int, e error) {
 		return
 	}
 	for _, weedDay := range weekDays {
-		if dayNum, ok := dayNums[weedDay]; ok {
+		if dayNum, ok := dayNums[strings.ToLower(weedDay)]; ok {
 			res[dayNum] = minutes
 		} else {
 			e = ErrBadWeekDay

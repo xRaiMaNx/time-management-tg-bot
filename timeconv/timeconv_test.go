@@ -78,6 +78,10 @@ func TestSchedule_IncorrectTime(t *testing.T) {
 		{"strange_symbols_before", "k00:01"},
 		{"seconds", "00:01:20"},
 		{"without_leading_zero_minute", "00:1"},
+		{"huge_hours", "9999999999999999999999999999999999:00"},
+		{"huge_minutes", "00:9999999999999999999999999999999"},
+		{"extra_zeros_hours", "000:01"},
+		{"extra_zeros_minutes", "00:001"},
 	}{
 		t.Run(test.name, func(t *testing.T) {
 			_, err := GetSchedule([]string{"monday"}, test.strTime)
