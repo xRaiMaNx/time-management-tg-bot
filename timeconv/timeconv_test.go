@@ -11,30 +11,32 @@ import (
 
 func TestSchedule_Simple(t *testing.T) {
 	for _, test := range []struct {
-		name string
+		name     string
 		weekDays []string
-		strTime string
-		want [7]int
+		strTime  string
+		want     [7]int
 	}{
-		{"monday", []string{"monday"}, "03:00", [7]int{3*60, 0, 0, 0, 0, 0, 0}},
-		{"tuesday", []string{"tuesday"}, "03:25", [7]int{0, 3*60+25, 0, 0, 0, 0, 0}},
-		{"wednesday", []string{"wednesday"}, "00:00", [7]int{0, 0, 0, 0, 0, 0, 0}},
-		{"thursday", []string{"thursday"}, "01:00", [7]int{0, 0, 0, 60, 0, 0, 0}},
-		{"friday", []string{"friday"}, "01:30", [7]int{0, 0, 0, 0, 90, 0, 0}},
-		{"saturday", []string{"saturday"}, "00:01", [7]int{0, 0, 0, 0, 0, 1, 0}},
-		{"sunday", []string{"sunday"}, "00:02", [7]int{0, 0, 0, 0, 0, 0, 2}},
-		{"double_weekday", []string{"sunday", "sunday"}, "00:02", [7]int{0, 0, 0, 0, 0, 0, 2}},
-		{"several_days", []string{"monday", "friday"}, "16:00", [7]int{16*60, 0, 0, 0, 16*60, 0, 0}},
-		{"several_days", []string{"monday", "tuesday", "friday", "sunday"}, "14:00", [7]int{14*60, 14*60, 0, 0, 14*60, 0, 14*60}},
-		{"bad_order", []string{"friday", "monday"}, "11:33", [7]int{11*60+33, 0, 0, 0, 11*60+33, 0, 0}},
+		{"monday", []string{"monday"}, "03:00", [7]int{-1, 3 * 60, -1, -1, -1, -1, -1}},
+		{"tuesday", []string{"tuesday"}, "03:25", [7]int{-1, -1, 3*60 + 25, -1, -1, -1, -1}},
+		{"wednesday", []string{"wednesday"}, "00:00", [7]int{-1, -1, -1, 0, -1, -1, -1}},
+		{"thursday", []string{"thursday"}, "01:00", [7]int{-1, -1, -1, -1, 60, -1, -1}},
+		{"friday", []string{"friday"}, "01:30", [7]int{-1, -1, -1, -1, -1, 90, -1}},
+		{"saturday", []string{"saturday"}, "00:01", [7]int{-1, -1, -1, -1, -1, -1, 1}},
+		{"sunday", []string{"sunday"}, "00:02", [7]int{2, -1, -1, -1, -1, -1, -1}},
+		{"double_weekday", []string{"sunday", "sunday"}, "00:02", [7]int{2, -1, -1, -1, -1, -1, -1}},
+		{"several_days", []string{"monday", "friday"}, "16:00", [7]int{-1, 16 * 60, -1, -1, -1, 16 * 60, -1}},
+		{"several_days", []string{"monday", "tuesday", "friday", "sunday"}, "14:00", [7]int{14 * 60, 14 * 60, 14 * 60, -1, -1, 14 * 60, -1}},
+		{"bad_order", []string{"friday", "monday"}, "11:33", [7]int{-1, 11*60 + 33, -1, -1, -1, 11*60 + 33, -1}},
 		{"all_days", []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
-		{"without_leading_zero_hour", []string{"monday"}, "3:00", [7]int{3*60, 0, 0, 0, 0, 0, 0}},
-		{"not_lower_case", []string{"Monday"}, "00:01", [7]int{1, 0, 0, 0, 0, 0, 0}},
+		{"without_leading_zero_hour", []string{"monday"}, "3:00", [7]int{-1, 3 * 60, -1, -1, -1, -1, -1}},
+		{"not_lower_case", []string{"Monday"}, "00:01", [7]int{-1, 1, -1, -1, -1, -1, -1}},
 		{"all", []string{"all"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
 		{"all_isnt_only_one", []string{"monday", "friday", "all"}, "00:01", [7]int{1, 1, 1, 1, 1, 1, 1}},
-	}{
+		{"one_zero", []string{"sunday"}, "00:00", [7]int{0, -1, -1, -1, -1, -1, -1}},
+		{"all_zero", []string{"all"}, "00:00", [7]int{0, 0, 0, 0, 0, 0, 0}},
+	} {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := GetSchedule(test.weekDays, test.strTime)
+			res, err := GetScheduleEvent(test.weekDays, test.strTime)
 			require.NoError(t, err)
 
 			assert.Equal(t, test.want, res)
@@ -44,16 +46,16 @@ func TestSchedule_Simple(t *testing.T) {
 
 func TestSchedule_IncorrectWeekDays(t *testing.T) {
 	for _, test := range []struct {
-		name string
+		name     string
 		weekDays []string
 	}{
 		{"empty", []string{}},
 		{"monday", []string{"monda"}},
 		{"num_instead_of_str", []string{"0"}},
 		{"only_1_day", []string{"monday", "tuesday", "frida"}},
-	}{
+	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := GetSchedule(test.weekDays, "00:01")
+			_, err := GetScheduleEvent(test.weekDays, "00:01")
 			assert.Error(t, err)
 
 			if !errors.Is(err, ErrBadWeekDay) {
@@ -65,7 +67,7 @@ func TestSchedule_IncorrectWeekDays(t *testing.T) {
 
 func TestSchedule_IncorrectTime(t *testing.T) {
 	for _, test := range []struct {
-		name string
+		name    string
 		strTime string
 	}{
 		{"empty", ""},
@@ -84,9 +86,9 @@ func TestSchedule_IncorrectTime(t *testing.T) {
 		{"huge_minutes", "00:9999999999999999999999999999999"},
 		{"extra_zeros_hours", "000:01"},
 		{"extra_zeros_minutes", "00:001"},
-	}{
+	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := GetSchedule([]string{"monday"}, test.strTime)
+			_, err := GetScheduleEvent([]string{"monday"}, test.strTime)
 			assert.Error(t, err)
 
 			if !errors.Is(err, ErrBadTime) {
@@ -108,13 +110,13 @@ Loop:
 	for {
 		select {
 		case <-ch:
-			if startMinute == time.Now().Truncate(1 * time.Minute) {
+			if startMinute == time.Now().Truncate(1*time.Minute) {
 				t.Errorf("stop waiting in the same minute")
 			}
 			break Loop
 		default:
 			dur := time.Since(start)
-			if dur > 1 * time.Minute {
+			if dur > 1*time.Minute {
 				t.Errorf("waiting more than 1 minute")
 			}
 		}

@@ -18,7 +18,21 @@ type RestResponse struct {
 	Result []Update `json:"result"`
 }
 
-type BotMessage struct {
+type BotMsg struct {
 	ChatID int    `json:"chat_id"`
 	Text   string `json:"text"`
+}
+
+type KeyboardButton struct {
+	Text string `json:"text"`
+}
+
+type ReplyKeyboardMarkup struct {
+	Keyboard []KeyboardButton `json:"keyboard"`
+}
+
+type BotMsgKeyboardMarkup struct {
+	ChatID      int                 `json:"chat_id"`
+	Text        string              `json:"text"`
+	ReplyMarkup ReplyKeyboardMarkup `json:"reply_markup"`
 }
